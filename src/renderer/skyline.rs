@@ -1,8 +1,94 @@
 use colored::*;
 use crate::renderer::building::get_max_height;
 use crate::renderer::sky_elements::{select_moon_type, print_night_sky};
+use rand::seq::SliceRandom;
 
-pub fn render_skyline(contributions: &[u32]) {
+#[derive(Clone)]
+struct Theme {
+    building_colors: Vec<fn(&str) -> ColoredString>,
+    window_colors: Vec<fn(&str) -> ColoredString>,
+    antenna_color: fn(&str) -> ColoredString,
+    roof_color: fn(&str) -> ColoredString,
+    base_color: fn(&str) -> ColoredString,
+}
+
+fn get_theme(theme: &str) -> Theme {
+    let theme_name = theme.to_lowercase();
+    if theme_name == "random" {
+        let themes = ["synthwave", "dracula", "solarized"];
+        let mut rng = rand::thread_rng();
+        let selected = themes.choose(&mut rng).unwrap();
+        return get_theme(selected);
+    }
+    
+    match theme_name.as_str() {
+        "dracula" => Theme {
+            building_colors: vec![
+                |s| s.bright_black().bold(),
+                |s| s.bright_blue().bold(),
+                |s| s.bright_magenta().bold(),
+                |s| s.bright_cyan().bold(),
+                |s| s.bright_yellow().bold(),
+                |s| s.bright_red().bold(),
+            ],
+            window_colors: vec![
+                |s| s.yellow(),
+                |s| s.bright_yellow(),
+                |s| s.bright_white(),
+                |s| s.bright_magenta(),
+                |s| s.bright_cyan(),
+                |s| s.bright_red(),
+            ],
+            antenna_color: |s| s.bright_red().bold(),
+            roof_color: |s| s.bright_white().bold(),
+            base_color: |s| s.bright_black().bold(),
+        },
+        "solarized" => Theme {
+            building_colors: vec![
+                |s| s.bright_yellow().bold(),
+                |s| s.yellow().bold(),
+                |s| s.bright_green().bold(),
+                |s| s.green().bold(),
+                |s| s.bright_blue().bold(),
+                |s| s.blue().bold(),
+            ],
+            window_colors: vec![
+                |s| s.bright_white(),
+                |s| s.bright_yellow(),
+                |s| s.bright_green(),
+                |s| s.bright_blue(),
+                |s| s.bright_cyan(),
+                |s| s.bright_magenta(),
+            ],
+            antenna_color: |s| s.bright_yellow().bold(),
+            roof_color: |s| s.bright_white().bold(),
+            base_color: |s| s.bright_black().bold(),
+        },
+        _ => Theme { // synthwave (default)
+            building_colors: vec![
+                |s| s.cyan().bold(),
+                |s| s.bright_cyan().bold(),
+                |s| s.blue().bold(),
+                |s| s.bright_blue().bold(),
+                |s| s.magenta().bold(),
+                |s| s.bright_magenta().bold(),
+            ],
+            window_colors: vec![
+                |s| s.cyan(),
+                |s| s.bright_cyan(),
+                |s| s.blue(),
+                |s| s.bright_blue(),
+                |s| s.magenta(),
+                |s| s.bright_magenta(),
+            ],
+            antenna_color: |s| s.bright_magenta().bold(),
+            roof_color: |s| s.bright_white().bold(),
+            base_color: |s| s.bright_black().bold(),
+        },
+    }
+}
+
+pub fn render_skyline(contributions: &[u32], theme: &str) {
     if contributions.is_empty() {
         println!("{}", "❌ No contribution data to render!".bright_red().bold());
         return;
@@ -21,7 +107,7 @@ pub fn render_skyline(contributions: &[u32]) {
     print_header();
     println!("{}", format!("📈 Max daily contributions: {}", max_contributions).bright_yellow().bold());
     print_skyline_title();
-    render_braille_skyline(&building_heights, contributions, max_height, &moon_type);
+    render_braille_skyline(&building_heights, contributions, max_height, &moon_type, theme);
     print_ground_section(25);
     print_statistics(contributions, max_contributions);
     print_legend();
@@ -37,7 +123,7 @@ fn dramatic_scale(contribution_count: u32, max_contributions: u32) -> u32 {
     scaled.round() as u32
 }
 
-fn render_braille_skyline(building_heights: &[u32], contributions: &[u32], max_height: u32, moon_type: &crate::renderer::sky_elements::MoonType) {
+fn render_braille_skyline(building_heights: &[u32], contributions: &[u32], max_height: u32, moon_type: &crate::renderer::sky_elements::MoonType, theme: &str) {
     let width = building_heights.len().min(25);
     print_night_sky(width * 4, moon_type);
     
@@ -45,7 +131,7 @@ fn render_braille_skyline(building_heights: &[u32], contributions: &[u32], max_h
         let mut line = String::new();
         for i in 0..width {
             let height = building_heights[i];
-            let building_part = get_building_part(height, row, contributions[i]);
+            let building_part = get_building_part(height, row, contributions[i], theme);
             line.push_str(&building_part);
             if i < width - 1 { line.push(' '); }
         }
@@ -53,55 +139,48 @@ fn render_braille_skyline(building_heights: &[u32], contributions: &[u32], max_h
     }
 }
 
-fn get_building_part(height: u32, current_row: u32, contributions: u32) -> String {
+fn get_building_part(height: u32, current_row: u32, contributions: u32, theme: &str) -> String {
+    let theme = get_theme(theme);
+    let color_idx = match height {
+        h if h > 25 => 5,
+        h if h > 20 => 4,
+        h if h > 15 => 3,
+        h if h > 10 => 2,
+        h if h > 5  => 1,
+        _           => 0,
+    };
+    let building_color = theme.building_colors[color_idx.min(theme.building_colors.len()-1)];
+    let window_color = theme.window_colors[color_idx.min(theme.window_colors.len()-1)];
+    let antenna_color = theme.antenna_color;
+    let roof_color = theme.roof_color;
+    let base_color = theme.base_color;
     let antenna_height = match height {
         h if h > 25 => 5,
         h if h > 18 => 3, 
         h if h > 12 => 1,
         _ => 0,
     };
-    
     if antenna_height > 0 && current_row > height && current_row <= height + antenna_height {
         return match current_row - height {
-            1 => " ⢰ ".bright_magenta().bold().to_string(),
-            2 => " ⢸ ".bright_magenta().to_string(),
-            _ => " ⢸ ".magenta().to_string(),
+            1 => antenna_color(" ⢰ ").to_string(),
+            2 => antenna_color(" ⢸ ").to_string(),
+            _ => antenna_color(" ⢸ ").to_string(),
         };
     }
-    
     if current_row > height { return "   ".to_string(); }
-    
     if current_row == 1 && height > 0 {
-        return "⣸⣸⣸".bright_black().bold().to_string();
+        return base_color("⣸⣸⣸").to_string();
     }
-    
     if current_row == height {
-        return "¯¯¯".bright_white().bold().to_string();
+        return roof_color("¯¯¯").to_string();
     }
-    
     let is_window = contributions > 0 && 
         ((current_row + contributions * 3) % 3 == 0 || 
          (current_row % 4 == 0 && contributions % 2 == 1));
-    
     if is_window {
-        return match height {
-            h if h > 25 => "⣾⣾⣾".bright_magenta().to_string(),
-            h if h > 20 => "⣾⣾⣾".magenta().to_string(),
-            h if h > 15 => "⣾⣾⣾".bright_blue().to_string(),
-            h if h > 10 => "⣾⣾⣾".blue().to_string(),
-            h if h > 5  => "⣾⣾⣾".bright_cyan().to_string(),
-            _           => "⣾⣾⣾".cyan().to_string(),
-        };
+        return window_color("⣾⣾⣾").to_string();
     }
-    
-    match height {
-        h if h > 25 => "⣿⣿⣿".bright_magenta().bold().to_string(),
-        h if h > 20 => "⣿⣿⣿".magenta().bold().to_string(),
-        h if h > 15 => "⣿⣿⣿".bright_blue().bold().to_string(),
-        h if h > 10 => "⣿⣿⣿".blue().bold().to_string(),
-        h if h > 5  => "⣿⣿⣿".bright_cyan().bold().to_string(),
-        _           => "⣿⣿⣿".cyan().bold().to_string(),
-    }
+    building_color("⣿⣿⣿").to_string()
 }
 
 fn print_header() {
