@@ -49,7 +49,7 @@ pub struct ContributionDay {
 }
 
 impl ContributionCalendar {
-    /// Flattens the weeks and days into a single vector of contribution counts
+    
     pub fn flatten_contributions(&self) -> Vec<u32> {
         self.weeks
             .iter()

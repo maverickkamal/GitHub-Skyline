@@ -1,178 +1,318 @@
-# GitHub Skyline
+# 🏙️ GitHub Skyline
 
-> **Turn your GitHub activity into a vibrant ASCII cityscape for your terminal!**
+[![Rust](https://img.shields.io/badge/rust-1.70+-orange.svg)](https://www.rust-lang.org)
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![Build Status](https://img.shields.io/badge/build-passing-brightgreen.svg)](https://github.com/yourusername/github-skyline)
 
-## 🌆 What is GitHub Skyline?
+> Transform your GitHub contributions into stunning ASCII art cityscapes! 🌆
 
-GitHub Skyline is a command-line tool that transforms your GitHub contribution history into a beautiful, colorful ASCII art skyline. Each building represents a day of coding, and the skyline tells the story of your year as a developer. It's fun, shareable, and a great way to show off your coding streaks!
+GitHub Skyline is a command-line tool that visualizes your GitHub contribution history as a beautiful ASCII art city skyline. Each day becomes a building in your personal coding metropolis, with heights representing your daily contribution counts.
 
 ## ✨ Features
-- Fetches your public GitHub contribution data (no special token scopes needed)
-- Renders a dramatic, synthwave-inspired ASCII skyline
-- Buildings scale with your daily contributions (the more you code, the taller the skyscraper!)
-- Dynamic sky with stars and a moon that changes based on your total contributions
-- Colorful stats and a legend to explain your city
-- Pure ASCII art—no emojis in the skyline itself
 
-## 📸 Example Output
-```
-    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.37s
-     Running `target\debug\github_skyline.exe adriangb`
-🚀 Generating skyline for GitHub user: adriangb
-✅ Fetched 367 days of contribution data
-📊 Total contributions: 3384
+### 🎨 **Visual Excellence**
+- **Braille-style ASCII Art**: Sophisticated Unicode patterns for detailed building textures
+- **6 Stunning Themes**: Choose from Synthwave, Dracula, Solarized, Cyberpunk, Matrix, or Sunset
+- **Dynamic Sky Elements**: Twinkling stars and phase-based moons that change with your total contributions
+- **Smart Scaling**: Non-linear dramatic scaling makes all skylines visually interesting
 
-╔═══════════════════════════════════════════════════════════════╗
-║                    🚀 GITHUB SKYLINE GENERATOR 🚀             ║
-╚═══════════════════════════════════════════════════════════════╝
-📈 Max daily contributions: 39
+### 🏆 **Gamification System** 
+- **Achievement Unlocking**: Earn Bronze, Silver, Gold, and Legendary achievements
+- **Multiple Categories**: Consistency, streaks, intensity, special patterns, and total contributions
+- **Real-time Display**: See your accomplishments alongside your skyline
 
-┌─────────────────────────────────────────────────────────────┐
-│                 BRAILLE-STYLE ASCII SKYLINE                 │
-└─────────────────────────────────────────────────────────────┘
-     .      +          .        +        .          +      .            +    ___---___      +  .   
+### 💻 **User Experience**
+- **Dual Interface**: Interactive mode with splash screen + CLI mode for power users
+- **Continuous Generation**: Generate multiple skylines without restarting the app
+- **Smart Token Management**: Auto-detection, validation, and helpful setup guides
+- **File Output**: Save your skylines as text files to share or archive
 
-  *              *              *              *              *           .--*        --.   *      
+## 🚀 Quick Start
 
-         '  +        '          +'           '      +    '           '  ./   ()  '   .-. \. +'     
+### Prerequisites
+- [Rust](https://rustup.rs/) 1.70 or higher
+- A GitHub account
+- GitHub Personal Access Token (instructions provided in-app)
 
-     .                 .                 .                 .           /   o .  .   (   )  \   .   
+### Installation
 
-            +                   +                   +                 / .            '-'    \      
+```bash
+# Clone the repository
+git clone https://github.com/yourusername/github-skyline.git
+cd github-skyline/github_skyline
 
-  *              *              *              *              *      | ()    .  O         . *|     
+# Build the project
+cargo build --release
 
-     .      +          .        +        .          +      .        |   +    .              + |.   
-
-         '           '           '           '           '          |'   o       '   ()      '|    
-
-            +                   +                   +               |   +   .--.          O + |    
-
-  *  .           *     .        *        .     *           .  *      | .   | .  |           *| .   
-
-            +                   +                   +                 \ +  `.__.'    o   .  /      
-
-                                                                       \                   /       
-
-     .   '  +        ' .        +'       .   '      +    ' .         '  `\  o.   ()      /' +' .   
-
-  *              *              *              *              *           `--___   ___--'   *      
-
-            +                   +                   +                   +       ---         +      
-
-
-
-
-
-
-
-
-
-
-
-
-                                                                         ⢸
-                                                                         ⢸
-                                                                         ⢰ 
-                                                                        ¯¯¯
-                                                                        ⣾⣾⣾
-                                                                        ⣾⣾⣾
-                                                                        ⣿⣿⣿
-                                                                        ⣾⣾⣾
-                                                                        ⣿⣿⣿
-                                                                        ⣾⣾⣾
-                                                                        ⣾⣾⣾
-                                                                        ⣿⣿⣿
-                                                                        ⣿⣿⣿
-                ¯¯¯                                         ¯¯¯         ⣾⣾⣾
-                ⣿⣿⣿                                         ⣿⣿⣿         ⣿⣿⣿                 ¯¯¯    
-            ¯¯¯ ⣿⣿⣿                                         ⣿⣿⣿         ⣿⣿⣿                 ⣿⣿⣿    
-            ⣾⣾⣾ ⣾⣾⣾ ¯¯¯                                     ⣾⣾⣾     ¯¯¯ ⣾⣾⣾                 ⣾⣾⣾    
-            ⣿⣿⣿ ⣾⣾⣾ ⣾⣾⣾                 ¯¯¯                 ⣾⣾⣾     ⣾⣾⣾ ⣾⣾⣾                 ⣾⣾⣾    
-            ⣿⣿⣿ ⣿⣿⣿ ⣿⣿⣿         ¯¯¯     ⣿⣿⣿ ¯¯¯             ⣿⣿⣿ ¯¯¯ ⣿⣿⣿ ⣿⣿⣿             ¯¯¯ ⣿⣿⣿    
-        ¯¯¯ ⣾⣾⣾ ⣾⣾⣾ ⣾⣾⣾         ⣾⣾⣾ ¯¯¯ ⣾⣾⣾ ⣾⣾⣾             ⣾⣾⣾ ⣾⣾⣾ ⣾⣾⣾ ⣾⣾⣾             ⣾⣾⣾ ⣾⣾⣾ ¯¯¯
-    ¯¯¯ ⣿⣿⣿ ⣿⣿⣿ ⣿⣿⣿ ⣿⣿⣿         ⣿⣿⣿ ⣿⣿⣿ ⣿⣿⣿ ⣿⣿⣿             ⣿⣿⣿ ⣿⣿⣿ ⣿⣿⣿ ⣿⣿⣿             ⣿⣿⣿ ⣿⣿⣿ ⣿⣿⣿
-    ⣿⣿⣿ ⣾⣾⣾ ⣿⣿⣿ ⣾⣾⣾ ⣾⣾⣾         ⣿⣿⣿ ⣾⣾⣾ ⣾⣾⣾ ⣾⣾⣾             ⣾⣾⣾ ⣿⣿⣿ ⣾⣾⣾ ⣾⣾⣾ ¯¯¯         ⣾⣾⣾ ⣾⣾⣾ ⣾⣾⣾
-    ⣾⣾⣾ ⣾⣾⣾ ⣾⣾⣾ ⣾⣾⣾ ⣾⣾⣾ ¯¯¯     ⣾⣾⣾ ⣾⣾⣾ ⣾⣾⣾ ⣾⣾⣾         ¯¯¯ ⣾⣾⣾ ⣾⣾⣾ ⣾⣾⣾ ⣾⣾⣾ ⣾⣾⣾         ⣾⣾⣾ ⣾⣾⣾ ⣾⣾⣾
-    ⣿⣿⣿ ⣿⣿⣿ ⣿⣿⣿ ⣿⣿⣿ ⣿⣿⣿ ⣿⣿⣿     ⣿⣿⣿ ⣿⣿⣿ ⣿⣿⣿ ⣿⣿⣿         ⣿⣿⣿ ⣿⣿⣿ ⣿⣿⣿ ⣿⣿⣿ ⣿⣿⣿ ⣿⣿⣿ ¯¯¯ ¯¯¯ ⣿⣿⣿ ⣿⣿⣿ ⣿⣿⣿
-    ⣸⣸⣸ ⣸⣸⣸ ⣸⣸⣸ ⣸⣸⣸ ⣸⣸⣸ ⣸⣸⣸     ⣸⣸⣸ ⣸⣸⣸ ⣸⣸⣸ ⣸⣸⣸         ⣸⣸⣸ ⣸⣸⣸ ⣸⣸⣸ ⣸⣸⣸ ⣸⣸⣸ ⣸⣸⣸ ⣸⣸⣸ ⣸⣸⣸ ⣸⣸⣸ ⣸⣸⣸ ⣸⣸⣸
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-╭─────────────────────────────────────────────────────────────╮
-│               📊 CODING STATISTICS 📊                       │
-├─────────────────────────────────────────────────────────────┤
-│ 📅 Total days tracked: 367                              │
-│ 🏙️  Days displayed:   25                                 │
-│ ⭐ Total contributions: 3384                             │
-│ 📈 Average per day:                                  │
-│ 🔥 Max daily contributions:   39                        │
-│ 💪 Active coding days: 335 (91.3%)                   │
-│ 🔥 Longest streak:   63 days                            │
-╰─────────────────────────────────────────────────────────────╯
-
-┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
-┃              SYNTHWAVE ARCHITECTURE LEGEND                ┃
-┣━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┫
-┃ ⣿⣿⣿  NEON SPIRE (26+) w/ Antenna ⢰                  ┃
-┃ ⣿⣿⣿  MEGA TOWER (21-25) w/ Antenna ⢸                ┃
-┃ ⣿⣿⣿  Cyber Corp (16-20) w/ Roof ¯¯¯                ┃
-┃ ⣿⣿⣿  Data Hub (11-15)                              ┃
-┃ ⣿⣿⣿  Apartments (6-10)                             ┃
-┃ ⣿⣿⣿  Shops (1-5)                                   ┃
-┣━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┫
-┃ Features: ⣸ Base, ⣾ Windows, ~~~ Water                  ┃
-┃ Sky: . * + Stars                                            ┃
-┃ Moons (by total contributions):                             ┃
-┃   0-499: Crescent  500-1499: Quarter                      ┃
-┃   1500-2999: Gibbous  3000+: Full Moon                    ┃
-┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
-
-▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
-         Your Braille-Style ASCII Architectural Year!
-         Share your beautiful terminal cityscape!
-▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
-
+# Run it!
+cargo run
 ```
 
-## 🚀 Quickstart
+### First Run - Interactive Mode
 
-1. **Install Rust** (if you don't have it):
-   https://rustup.rs
+Simply run the application and follow the guided setup:
 
-2. **Clone this repo:**
-   ```sh
-   git clone https://github.com/yourusername/github_skyline.git
-   cd github_skyline
-   ```
+```bash
+cargo run
+```
 
-3. **Set your GitHub token:**
-   - Go to [GitHub > Settings > Developer settings > Personal access tokens](https://github.com/settings/tokens)
-   - Generate a new token (no scopes needed)
-   - In your terminal:
-     - **PowerShell:**
-       ```powershell
-       $env:GITHUB_TOKEN="your_token_here"
-       ```
-     - **Linux/macOS:**
-       ```bash
-       export GITHUB_TOKEN="your_token_here"
-       ```
+The app will:
+1. 🔑 Help you set up your GitHub token
+2. 👤 Ask for the username to visualize  
+3. 🎨 Let you choose a color theme
+4. 💾 Offer to save the result to a file
+5. 🏙️ Generate your beautiful skyline!
 
-4. **Build and run:**
-   ```sh
-   cargo run --release -- your_github_username
-   ```
+### Command Line Usage
 
-## 🛠️ Options
-- Just pass your GitHub username as the only argument.
-- More features (themes, file output, etc.) coming soon!
+For power users, skip the interactive setup:
+
+```bash
+# Basic usage
+cargo run -- yourusername
+
+# With theme selection
+cargo run -- yourusername --theme matrix
+
+# Save to file
+cargo run -- yourusername --theme cyberpunk --output my-skyline.txt
+
+# All options
+cargo run -- yourusername --theme random --output skyline.txt --no-interactive
+```
+
+## 🎨 Themes Gallery
+
+| Theme | Description | Colors |
+|-------|-------------|---------|
+| **Synthwave** | Neon cyber vibes (default) | 🩵💜 Cyan & Magenta |
+| **Dracula** | Dark with vibrant accents | 🖤💜 Dark & Purple |
+| **Solarized** | Warm, balanced earth tones | 🟨🟩 Yellow & Green |
+| **Cyberpunk** | Electric future aesthetic | 💜🩵 Magenta & Cyan |
+| **Matrix** | Digital green rain | 🟢⚪ Green & White |
+| **Sunset** | Warm evening colors | 🔴🟡 Red & Yellow |
+| **Random** | Surprise me! | 🎲 Randomized |
+
+## 🏆 Achievement System
+
+Unlock achievements across multiple categories:
+
+### 📊 **Total Contributions**
+- 🥉 **Active Developer**: 1,000+ contributions
+- 🥈 **Prolific Coder**: 2,500+ contributions  
+- 🥇 **Coding Machine**: 5,000+ contributions
+- 🏆 **Code Titan**: 10,000+ contributions
+
+### ⚡ **Consistency**
+- 🏃 **Weekend Warrior**: Active 25%+ of days
+- 📊 **Regular Contributor**: Active 50%+ of days
+- 📈 **Steady Coder**: Active 70%+ of days
+- ⚡ **Daily Grinder**: Active 90%+ of days
+
+### 🔥 **Streaks**
+- 📅 **Week Warrior**: 7+ day streak
+- 🏁 **Monthly Marathon**: 30+ day streak
+- 💯 **Centurion**: 100+ day streak
+- 🔥 **Year-Long Dedication**: 365+ day streak
+
+### ⚡ **Intensity**
+- 📈 **Big Day**: 10+ contributions in one day
+- 🎯 **High Roller**: 25+ contributions in one day
+- ⚡ **Power User**: 50+ contributions in one day
+- ⚙️ **Efficient Coder**: Average 10+ per active day
+- 💎 **Quality over Quantity**: Average 20+ per active day
+
+### 🌟 **Special Patterns**
+- 📅 **Perfect Month**: 30 consecutive active days
+- 🏃‍♂️ **Marathon Runner**: 3+ perfect months
+- 🔄 **The Comeback**: Return after long break
+- 🎯 **Strong Finish**: High activity in recent months
+
+## 📖 Usage Examples
+
+### Interactive Mode (Recommended for first-time users)
+```bash
+cargo run
+```
+Follow the beautiful ASCII splash screen and guided setup!
+
+### Quick Generation
+```bash
+# Generate skyline for specific user
+cargo run -- octocat
+
+# Different theme
+cargo run -- octocat --theme dracula
+
+# Save to file
+cargo run -- octocat --output octocat-skyline.txt
+```
+
+### Advanced Usage
+```bash
+# Random theme, save to file, skip interactive prompts
+cargo run -- torvalds --theme random --output linus.txt --no-interactive
+
+# Help and options
+cargo run -- --help
+```
+
+## 🔧 Configuration
+
+### GitHub Token Setup
+
+The app needs a GitHub Personal Access Token to fetch contribution data:
+
+1. Go to [GitHub Settings > Personal Access Tokens](https://github.com/settings/tokens)
+2. Click "Generate new token" → "Generate new token (classic)"
+3. Give it a name like "GitHub Skyline"
+4. **No scopes needed** (public data only)
+5. Copy the token
+
+#### Set the token (choose one method):
+
+**Option 1: Interactive Setup** (Recommended)
+```bash
+cargo run
+# Follow the guided setup
+```
+
+**Option 2: Environment Variable**
+```bash
+# Windows (PowerShell)
+$env:GITHUB_TOKEN="your_token_here"
+
+# Windows (Command Prompt) 
+set GITHUB_TOKEN=your_token_here
+
+# macOS/Linux
+export GITHUB_TOKEN="your_token_here"
+```
+
+**Option 3: Persistent Setup**
+Add to your shell profile (`~/.bashrc`, `~/.zshrc`, etc.):
+```bash
+export GITHUB_TOKEN="your_token_here"
+```
+
+## 🎯 CLI Reference
+
+```
+github_skyline [OPTIONS] [USERNAME]
+
+ARGUMENTS:
+    [USERNAME]    GitHub username to generate skyline for
+
+OPTIONS:
+    --theme <THEME>       Color theme: synthwave, dracula, solarized, 
+                         cyberpunk, matrix, sunset, random
+    -o, --output <FILE>   Save skyline to file instead of terminal
+    --no-interactive      Skip interactive mode and prompts
+    -h, --help           Show help information
+    -V, --version        Show version information
+```
+
+## 🔍 Troubleshooting
+
+### Common Issues
+
+**"GITHUB_TOKEN environment variable not set"**
+- Follow the token setup instructions above
+- Make sure you restart your terminal after setting environment variables
+
+**"401 Unauthorized"**
+- Check that your token is valid and properly set
+- Try generating a new token if the old one expired
+- Ensure no extra spaces or characters in the token
+
+**"Network request failed"**
+- Check your internet connection
+- GitHub API might be temporarily unavailable
+- Try again in a few minutes
+
+**Build errors on Windows**
+- Install [Microsoft C++ Build Tools](https://visualstudio.microsoft.com/visual-cpp-build-tools/)
+- Or use the GNU toolchain: `rustup default stable-x86_64-pc-windows-gnu`
+
+**"User not found"**
+- Verify the GitHub username is correct and public
+- Private profiles won't work with public API access
+
+## 🏗️ Project Structure
+
+```
+github_skyline/
+├── src/
+│   ├── main.rs              # Entry point and CLI setup
+│   ├── api/                 # GitHub API integration
+│   │   ├── client.rs        # HTTP client and auth
+│   │   ├── queries.rs       # GraphQL queries
+│   │   └── types.rs         # Data structures
+│   ├── cli/                 # Command line interface
+│   │   └── interactive.rs   # Interactive mode and prompts
+│   ├── renderer/            # ASCII art generation
+│   │   ├── skyline.rs       # Main rendering logic
+│   │   ├── building.rs      # Building utilities
+│   │   └── sky_elements.rs  # Stars, moons, sky effects
+│   ├── achievements.rs      # Gamification system
+│   └── output.rs           # File output handling
+├── Cargo.toml              # Dependencies and metadata
+└── README.md               # This file!
+```
 
 ## 🤝 Contributing
-Pull requests are welcome! If you have ideas for new art styles, themes, or features, open an issue or PR.
 
-## 📢 Why?
-Because your code deserves a skyline. And because terminals should be beautiful.
+We welcome contributions! Here's how to get started:
+
+1. **Fork the repository**
+2. **Create a feature branch**: `git checkout -b amazing-feature`
+3. **Make your changes** and test thoroughly
+4. **Follow Rust conventions**: `cargo fmt` and `cargo clippy`
+5. **Write clear commit messages**
+6. **Submit a pull request**
+
+### Development Setup
+```bash
+git clone https://github.com/yourusername/github-skyline.git
+cd github-skyline/github_skyline
+cargo build
+cargo test
+cargo run
+```
+
+### Ideas for Contributions
+- 🎨 New color themes
+- 🏆 Additional achievement types  
+- 🌍 Internationalization
+- 📊 More visualization options
+- 🔧 Performance improvements
+- 📖 Documentation enhancements
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 🙏 Acknowledgments
+
+- 🦀 **Rust Community** - For the amazing ecosystem
+- 🐙 **GitHub** - For the fantastic GraphQL API
+- 🎨 **ASCII Art Pioneers** - For inspiration in terminal art
+- 💜 **Open Source Contributors** - You make the world better!
+
+## 🌟 Why GitHub Skyline?
+
+Your GitHub contributions tell a story - late nights, creative breakthroughs, collaborative moments, and persistent dedication. GitHub Skyline transforms that story into a visual masterpiece you can share, save, and celebrate.
+
+Whether you're a weekend warrior, a daily grinder, or somewhere in between, your coding journey deserves to be visualized in style. Each commit becomes a block in your personal metropolis, each streak a skyscraper reaching for the digital sky.
+
+**Build your city. Share your story. Code your skyline.** 🏙️✨
 
 ---
 
-Made with ❤️ and way too much coffee. 
+<div align="center">
+
+**[⭐ Star this repo](https://github.com/yourusername/github-skyline)** • **[🐛 Report Bug](https://github.com/yourusername/github-skyline/issues)** • **[💡 Request Feature](https://github.com/yourusername/github-skyline/issues)**
+
+Made with 💜 by developers, for developers
+
+</div>

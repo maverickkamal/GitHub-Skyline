@@ -15,7 +15,7 @@ struct Theme {
 fn get_theme(theme: &str) -> Theme {
     let theme_name = theme.to_lowercase();
     if theme_name == "random" {
-        let themes = ["synthwave", "dracula", "solarized"];
+        let themes = ["synthwave", "dracula", "solarized", "cyberpunk", "matrix", "sunset"];
         let mut rng = rand::thread_rng();
         let selected = themes.choose(&mut rng).unwrap();
         return get_theme(selected);
@@ -64,7 +64,70 @@ fn get_theme(theme: &str) -> Theme {
             roof_color: |s| s.bright_white().bold(),
             base_color: |s| s.bright_black().bold(),
         },
-        _ => Theme { // synthwave (default)
+        "cyberpunk" => Theme {
+            building_colors: vec![
+                |s| s.bright_magenta().bold(),
+                |s| s.magenta().bold(),
+                |s| s.bright_cyan().bold(),
+                |s| s.cyan().bold(),
+                |s| s.bright_yellow().bold(),
+                |s| s.yellow().bold(),
+            ],
+            window_colors: vec![
+                |s| s.bright_white(),
+                |s| s.bright_cyan(),
+                |s| s.bright_magenta(),
+                |s| s.bright_yellow(),
+                |s| s.white(),
+                |s| s.cyan(),
+            ],
+            antenna_color: |s| s.bright_magenta().bold(),
+            roof_color: |s| s.bright_cyan().bold(),
+            base_color: |s| s.magenta().bold(),
+        },
+        "matrix" => Theme {
+            building_colors: vec![
+                |s| s.green().bold(),
+                |s| s.bright_green().bold(),
+                |s| s.green(),
+                |s| s.bright_green(),
+                |s| s.bright_white().bold(),
+                |s| s.white().bold(),
+            ],
+            window_colors: vec![
+                |s| s.bright_green(),
+                |s| s.green(),
+                |s| s.bright_white(),
+                |s| s.white(),
+                |s| s.bright_green(),
+                |s| s.green(),
+            ],
+            antenna_color: |s| s.bright_green().bold(),
+            roof_color: |s| s.bright_white().bold(),
+            base_color: |s| s.green().bold(),
+        },
+        "sunset" => Theme {
+            building_colors: vec![
+                |s| s.bright_red().bold(),
+                |s| s.red().bold(),
+                |s| s.bright_yellow().bold(),
+                |s| s.yellow().bold(),
+                |s| s.bright_magenta().bold(),
+                |s| s.magenta().bold(),
+            ],
+            window_colors: vec![
+                |s| s.bright_yellow(),
+                |s| s.yellow(),
+                |s| s.bright_white(),
+                |s| s.bright_red(),
+                |s| s.bright_magenta(),
+                |s| s.red(),
+            ],
+            antenna_color: |s| s.bright_red().bold(),
+            roof_color: |s| s.bright_yellow().bold(),
+            base_color: |s| s.red().bold(),
+        },
+        _ => Theme { 
             building_colors: vec![
                 |s| s.cyan().bold(),
                 |s| s.bright_cyan().bold(),
@@ -110,6 +173,11 @@ pub fn render_skyline(contributions: &[u32], theme: &str) {
     render_braille_skyline(&building_heights, contributions, max_height, &moon_type, theme);
     print_ground_section(25);
     print_statistics(contributions, max_contributions);
+    
+  
+    let achievements = crate::achievements::calculate_achievements(contributions);
+    crate::achievements::display_achievements(&achievements);
+    
     print_legend();
     print_footer();
 }
@@ -127,12 +195,29 @@ fn render_braille_skyline(building_heights: &[u32], contributions: &[u32], max_h
     let width = building_heights.len().min(25);
     print_night_sky(width * 4, moon_type);
     
+    let total_contributions: u32 = contributions.iter().sum();
+    let longest_streak = calculate_longest_streak(contributions);
+    
     for row in (1..=max_height).rev() {
         let mut line = String::new();
         for i in 0..width {
-            let height = building_heights[i];
-            let building_part = get_building_part(height, row, contributions[i], theme);
-            line.push_str(&building_part);
+            let day_contributions = contributions[contributions.len().saturating_sub(width) + i];
+            
+            
+            if let Some(special_building) = get_special_building(i, day_contributions, total_contributions, longest_streak) {
+                let special_height = special_building.len() as u32;
+                if row <= special_height {
+                    let building_line_index = (special_height - row) as usize;
+                    line.push_str(&special_building[building_line_index]);
+                } else {
+                    line.push_str("   ");
+                }
+            } else {
+
+                let height = building_heights[i];
+                let building_part = get_building_part(height, row, day_contributions, theme);
+                line.push_str(&building_part);
+            }
             if i < width - 1 { line.push(' '); }
         }
         println!("{}", line);
@@ -183,6 +268,13 @@ fn get_building_part(height: u32, current_row: u32, contributions: u32, theme: &
     building_color("⣿⣿⣿").to_string()
 }
 
+fn get_special_building(_display_index: usize, _contributions: u32, _total_contributions: u32, _longest_streak: u32) -> Option<Vec<String>> {
+   
+    None
+}
+
+
+
 fn print_header() {
     println!("\n{}", "╔═══════════════════════════════════════════════════════════════╗".bright_cyan().bold());
     println!("{}", "║                    🚀 GITHUB SKYLINE GENERATOR 🚀             ║".bright_cyan().bold());
@@ -232,19 +324,19 @@ fn print_statistics(contributions: &[u32], max_contributions: u32) {
     println!("{}", "╰─────────────────────────────────────────────────────────────╯".bright_blue().bold());
 }
 
-fn calculate_longest_streak(contributions: &[u32]) -> usize {
-    let mut max_streak = 0;
-    let mut current_streak = 0;
+fn calculate_longest_streak(contributions: &[u32]) -> u32 {
+    let mut longest = 0;
+    let mut current = 0;
     
     for &count in contributions {
         if count > 0 {
-            current_streak += 1;
-            max_streak = max_streak.max(current_streak);
+            current += 1;
+            longest = longest.max(current);
         } else {
-            current_streak = 0;
+            current = 0;
         }
     }
-    max_streak
+    longest
 }
 
 fn print_legend() {
@@ -273,4 +365,13 @@ fn print_footer() {
     println!("{}", "         Your Braille-Style ASCII Architectural Year!         ".bright_magenta().bold());
     println!("{}", "         Share your beautiful terminal cityscape!           ".bright_cyan().bold());
     println!("{}", "▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓".bright_magenta());
+    
+    println!("\n{}", "🎉 Your GitHub skyline is ready! Thanks for using GitHub Skyline!".bright_green().bold());
+    println!("{}", "👤 Want to generate another skyline? Press Enter to continue or Ctrl+C to quit...".bright_yellow());
+    use std::io::{self, Write};
+    print!("{}", "   Press Enter: ".bright_cyan());
+    io::stdout().flush().unwrap();
+    
+    let mut input = String::new();
+    let _ = io::stdin().read_line(&mut input);
 }

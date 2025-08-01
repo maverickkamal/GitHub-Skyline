@@ -1,4 +1,5 @@
 use colored::*;
+use rand::prelude::*;
 
 pub enum MoonType {
     Crescent,
@@ -17,43 +18,74 @@ pub fn select_moon_type(total_contributions: u32) -> MoonType {
 }
 
 pub fn print_night_sky(width: usize, moon_type: &MoonType) {
-    let moon = get_moon_art(moon_type);
-    let moon_height = moon.len();
-    let moon_width = moon.iter().map(|s| s.len()).max().unwrap_or(0);
-    let moon_pos = if width > moon_width + 10 { width - moon_width - 5 } else { 0 };
-
-    for i in 0..moon_height {
-        let mut sky_line = String::new();
-        let moon_slice = moon[i];
+    let mut rng = rand::thread_rng();
+        
+    let star_chars = ['*', '·', '+', '✦', '⋆', '✧'];
+    let twinkle_chars = ['.', '˚', '°', '*', '✦', ' '];
+    
+    let moon_lines = get_moon_art(moon_type);
+    let moon_start_col = if width > 80 { width - 30 } else if width > 60 { width - 25 } else { width - 20 };
+    let moon_start_row = 2;
+    let moon_end_row = moon_start_row + moon_lines.len();
+    
+    for row in 0..15 {
+        print!("{}", " ".repeat(5));
         
         for col in 0..width {
-            if col >= moon_pos && col < moon_pos + moon_slice.len() {
-                let moon_char_index = col - moon_pos;
-                if let Some(moon_char) = moon_slice.chars().nth(moon_char_index) {
-                    if moon_char != ' ' {
-                        sky_line.push_str(&moon_char.to_string().bright_white().bold().to_string());
-                        continue;
+            let mut cell_filled = false;
+            
+            if row >= moon_start_row && row < moon_end_row && col >= moon_start_col {
+                let moon_row_idx = row - moon_start_row;
+                let moon_col_idx = col - moon_start_col;
+                
+                if moon_row_idx < moon_lines.len() {
+                    let moon_line = &moon_lines[moon_row_idx];
+                    if moon_col_idx < moon_line.len() {
+                        let moon_char = moon_line.chars().nth(moon_col_idx).unwrap_or(' ');
+                        if moon_char != ' ' {
+                            print!("{}", format!("{}", moon_char).bright_yellow().bold());
+                            cell_filled = true;
+                        }
                     }
                 }
             }
-
-            let star_char = match (i, col) {
-                (r, c) if r % 3 == 0 && c % 18 == 5 => Some("."),
-                (r, c) if r % 4 == 1 && c % 15 == 2 => Some("*"),
-                (r, c) if r % 2 == 0 && c % 20 == 12 => Some("+"),
-                (r, c) if r % 5 == 2 && c % 12 == 9 => Some("'"),
-                _ => None,
-            };
-
-            if let Some(star) = star_char {
-                sky_line.push_str(&star.bright_yellow().to_string());
-            } else {
-                sky_line.push(' ');
+            
+            if !cell_filled {
+                let star_probability = match row {
+                    0..=4 => 0.08,  
+                    5..=9 => 0.05,  
+                    10..=14 => 0.03, 
+                    _ => 0.0,
+                };
+                
+                if rng.gen::<f64>() < star_probability {
+                    let use_twinkle = rng.gen::<f64>() < 0.3;
+                    let star_char = if use_twinkle {
+                        *twinkle_chars.choose(&mut rng).unwrap()
+                    } else {
+                        *star_chars.choose(&mut rng).unwrap()
+                    };
+                    
+                    let colored_star = match rng.gen_range(0..6) {
+                        0 => format!("{}", star_char).bright_white().to_string(),
+                        1 => format!("{}", star_char).bright_cyan().to_string(),
+                        2 => format!("{}", star_char).bright_blue().to_string(),
+                        3 => format!("{}", star_char).cyan().to_string(),
+                        4 => format!("{}", star_char).white().to_string(),
+                        _ => format!("{}", star_char).bright_yellow().to_string(),
+                    };
+                    print!("{}", colored_star);
+                } else {
+                    print!(" ");
+                }
             }
         }
-        println!("{}", sky_line);
+        
+        println!();
     }
 }
+
+
 
 fn get_moon_art(moon_type: &MoonType) -> Vec<&'static str> {
     match moon_type {
