@@ -238,27 +238,6 @@ OPTIONS:
 - Verify the GitHub username is correct and public
 - Private profiles won't work with public API access
 
-## 🏗️ Project Structure
-
-```
-github_skyline/
-├── src/
-│   ├── main.rs              # Entry point and CLI setup
-│   ├── api/                 # GitHub API integration
-│   │   ├── client.rs        # HTTP client and auth
-│   │   ├── queries.rs       # GraphQL queries
-│   │   └── types.rs         # Data structures
-│   ├── cli/                 # Command line interface
-│   │   └── interactive.rs   # Interactive mode and prompts
-│   ├── renderer/            # ASCII art generation
-│   │   ├── skyline.rs       # Main rendering logic
-│   │   ├── building.rs      # Building utilities
-│   │   └── sky_elements.rs  # Stars, moons, sky effects
-│   ├── achievements.rs      # Gamification system
-│   └── output.rs           # File output handling
-├── Cargo.toml              # Dependencies and metadata
-└── README.md               # This file!
-```
 
 ## 🤝 Contributing
 
