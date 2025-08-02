@@ -2,7 +2,7 @@
 
 [![Rust](https://img.shields.io/badge/rust-1.70+-orange.svg)](https://www.rust-lang.org)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-[![Build Status](https://img.shields.io/badge/build-passing-brightgreen.svg)](https://github.com/yourusername/github-skyline)
+[![Build Status](https://img.shields.io/badge/build-passing-brightgreen.svg)](https://github.com/maverickkamal/github-skyline)
 
 > Transform your GitHub contributions into stunning ASCII art cityscapes! 🌆
 
@@ -38,7 +38,7 @@ GitHub Skyline is a command-line tool that visualizes your GitHub contribution h
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/github-skyline.git
+git clone https://github.com/maverickkamal/github-skyline.git
 cd github-skyline/github_skyline
 
 # Build the project
@@ -273,7 +273,7 @@ We welcome contributions! Here's how to get started:
 
 ### Development Setup
 ```bash
-git clone https://github.com/yourusername/github-skyline.git
+git clone https://github.com/maverickkamal/github-skyline.git
 cd github-skyline/github_skyline
 cargo build
 cargo test
@@ -311,7 +311,7 @@ Whether you're a weekend warrior, a daily grinder, or somewhere in between, your
 
 <div align="center">
 
-**[⭐ Star this repo](https://github.com/yourusername/github-skyline)** • **[🐛 Report Bug](https://github.com/yourusername/github-skyline/issues)** • **[💡 Request Feature](https://github.com/yourusername/github-skyline/issues)**
+**[⭐ Star this repo](https://github.com/maverickkamal/github-skyline)** • **[🐛 Report Bug](https://github.com/maverickkamal/github-skyline/issues)** • **[💡 Request Feature](https://github.com/maverickkamal/github-skyline/issues)**
 
 Made with 💜 by developers, for developers
 
