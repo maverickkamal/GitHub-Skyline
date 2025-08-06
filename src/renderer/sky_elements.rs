@@ -58,8 +58,8 @@ pub fn print_night_sky(width: usize, moon_type: &MoonType) {
                     _ => 0.0,
                 };
                 
-                if rng.gen::<f64>() < star_probability {
-                    let use_twinkle = rng.gen::<f64>() < 0.3;
+                if rng.r#gen::<f64>() < star_probability {
+                    let use_twinkle = rng.r#gen::<f64>() < 0.3;
                     let star_char = if use_twinkle {
                         *twinkle_chars.choose(&mut rng).unwrap()
                     } else {
