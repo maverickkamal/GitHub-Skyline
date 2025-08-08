@@ -51,79 +51,89 @@ fn strip_ansi_codes(text: &str) -> String {
 pub fn render_skyline_to_string(
     contributions: &[u32], 
     _theme: &str,
-    _username: &str
+    _username: &str,
+    style: &str,
+    scale: &str,
+    ascii_only: bool,
+    sky_mode: &str,
+    width_opt: Option<usize>,
 ) -> (String, u32) {
-
-    use crate::renderer::building::get_max_height;
+    use crate::renderer::building::{get_max_height, compute_building_heights};
     use crate::renderer::sky_elements::select_moon_type;
-    
+
     let mut output = String::new();
     let max_contributions = get_max_height(contributions);
     let total_contributions: u32 = contributions.iter().sum();
-    
-   
+
     output.push_str("╔═══════════════════════════════════════════════════════════════╗\n");
     output.push_str("║                    🚀 GITHUB SKYLINE GENERATOR 🚀             ║\n");
     output.push_str("╚═══════════════════════════════════════════════════════════════╝\n");
     output.push_str(&format!("📈 Max daily contributions: {}\n", max_contributions));
     output.push('\n');
-    
-   
+
+
     output.push_str("┌─────────────────────────────────────────────────────────────┐\n");
-    output.push_str("│                 BRAILLE-STYLE ASCII SKYLINE                 │\n");
+    let title = match style.to_lowercase().as_str() {
+        "ascii" => "│                     ASCII SKYLINE                          │\n",
+        "blocks" => "│                   BLOCKS SKYLINE                          │\n",
+        _ => "│                 BRAILLE-STYLE ASCII SKYLINE                 │\n",
+    };
+    output.push_str(title);
     output.push_str("└─────────────────────────────────────────────────────────────┘\n");
+
     
-   
-    let building_heights: Vec<u32> = contributions
-        .iter()
-        .map(|&count| dramatic_scale(count, max_contributions))
-        .collect();
-    
+    let target_height: u32 = 30;
+    let building_heights: Vec<u32> = compute_building_heights(contributions, max_contributions, target_height, scale);
     let _moon_type = select_moon_type(total_contributions);
     let max_height = *building_heights.iter().max().unwrap_or(&1) + 6;
-    
-   
-    for _row in 0..15 {
-        output.push_str("     ");
-        for _col in 0..100 {
-            if rand::random::<f32>() < 0.05 {
-                output.push('*');
-            } else {
-                output.push(' ');
-            }
-        }
-        output.push('\n');
-    }
-    
 
-    let width = building_heights.len().min(25);
+    
+    if sky_mode != "none" {
+        for _row in 0..15 {
+            output.push_str("     ");
+            for _col in 0..100 { 
+                if rand::random::<f32>() < 0.05 { output.push('*'); } else { output.push(' '); }
+            }
+            output.push('\n');
+        }
+    }
+
+    
+    let mut width = building_heights.len().min(25);
+    if let Some(w) = width_opt { width = building_heights.len().min(w); }
     for row in (1..=max_height).rev() {
         output.push_str("    ");
         for i in 0..width {
             let height = building_heights[i];
-            if row <= height {
-                if row == 1 {
-                    output.push_str("⣸⣸⣸");
-                } else if row == height {
-                    output.push_str("¯¯¯");
-                } else {
-                    output.push_str("⣿⣿⣿");
+            match style.to_lowercase().as_str() {
+                "ascii" => {
+                    if row > height { output.push_str("   "); }
+                    else if row == height { output.push_str("___"); }
+                    else if row == 1 { output.push_str("###"); }
+                    else { output.push_str("###"); }
                 }
-            } else {
-                output.push_str("   ");
+                "blocks" => {
+                    let fill = if ascii_only { '#' } else { '█' };
+                    if row > height { output.push_str("   "); } else { output.push(fill); output.push(fill); output.push(fill); }
+                }
+                _ => {
+                    if row <= height {
+                        if row == 1 { output.push_str("⣸⣸⣸"); }
+                        else if row == height { output.push_str("¯¯¯"); }
+                        else { output.push_str("⣿⣿⣿"); }
+                    } else { output.push_str("   "); }
+                }
             }
             if i < width - 1 { output.push(' '); }
         }
         output.push('\n');
     }
-    
+
     
     output.push_str("    ");
-    for _i in 0..(width * 3 + width - 1) {
-        output.push('~');
-    }
+    for _i in 0..(width * 3 + width - 1) { output.push('~'); }
     output.push('\n');
-    
+
     
     output.push('\n');
     output.push_str("╭─────────────────────────────────────────────────────────────╮\n");
@@ -134,59 +144,36 @@ pub fn render_skyline_to_string(
     output.push_str(&format!("│ ⭐ Total contributions: {:>4}                             │\n", total_contributions));
     output.push_str(&format!("│ 🔥 Max daily contributions:  {:>3}                        │\n", max_contributions));
     output.push_str("╰─────────────────────────────────────────────────────────────╯\n");
-    
-    
+
+
     output.push('\n');
     let achievements = crate::achievements::calculate_achievements(contributions);
     if !achievements.is_empty() {
         output.push_str("╔═══════════════════════════════════════════════════════════════╗\n");
         output.push_str("║                    🏆 ACHIEVEMENTS UNLOCKED 🏆                ║\n");
         output.push_str("╚═══════════════════════════════════════════════════════════════╝\n");
-        
-        
         let legendary: Vec<_> = achievements.iter().filter(|a| a.tier == crate::achievements::Tier::Legendary).collect();
         let gold: Vec<_> = achievements.iter().filter(|a| a.tier == crate::achievements::Tier::Gold).collect();
         let silver: Vec<_> = achievements.iter().filter(|a| a.tier == crate::achievements::Tier::Silver).collect();
         let bronze: Vec<_> = achievements.iter().filter(|a| a.tier == crate::achievements::Tier::Bronze).collect();
-        
-        for (tier_name, tier_achievements) in [
-            ("LEGENDARY", legendary),
-            ("GOLD", gold),
-            ("SILVER", silver),
-            ("BRONZE", bronze)
-        ] {
+        for (tier_name, tier_achievements) in [("LEGENDARY", legendary), ("GOLD", gold), ("SILVER", silver), ("BRONZE", bronze)] {
             if !tier_achievements.is_empty() {
                 output.push_str(&format!("\n🏅 {} TIER\n", tier_name));
                 for achievement in tier_achievements {
-                    output.push_str(&format!(
-                        "   {} {} - {}\n",
-                        achievement.icon,
-                        achievement.name,
-                        achievement.description
-                    ));
+                    output.push_str(&format!("   {} {} - {}\n", achievement.icon, achievement.name, achievement.description));
                 }
             }
         }
-        
         output.push_str(&format!("\n🎖️  Total Achievements Earned: {}\n", achievements.len()));
     }
-    
-    
+
     output.push('\n');
     output.push_str("▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓\n");
     output.push_str("         Your Braille-Style ASCII Architectural Year!         \n");
     output.push_str("         Share your beautiful terminal cityscape!           \n");
     output.push_str("▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓\n");
-    
+
     (output, total_contributions)
 }
 
 
-fn dramatic_scale(contribution_count: u32, max_contributions: u32) -> u32 {
-    if contribution_count == 0 { return 0; }
-    
-    let norm = contribution_count as f32 / max_contributions as f32;
-    let dramatic = norm.powf(1.2);
-    let scaled = (dramatic * 28.0) + 2.0;
-    scaled.round() as u32
-} 

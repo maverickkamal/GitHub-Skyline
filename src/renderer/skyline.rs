@@ -1,5 +1,5 @@
 use colored::*;
-use crate::renderer::building::get_max_height;
+use crate::renderer::building::{get_max_height, compute_building_heights};
 use crate::renderer::sky_elements::{select_moon_type, print_night_sky};
 use rand::seq::SliceRandom;
 
@@ -151,50 +151,88 @@ fn get_theme(theme: &str) -> Theme {
     }
 }
 
+#[allow(dead_code)]
 pub fn render_skyline(contributions: &[u32], theme: &str) {
+   
+    render_skyline_with_options(
+        contributions,
+        theme,
+        "braille",
+        "dramatic",
+        false,
+        "detailed",
+        None,
+    );
+}
+
+pub fn render_skyline_with_options(
+    contributions: &[u32],
+    theme: &str,
+    style: &str,
+    scale: &str,
+    ascii_only: bool,
+    sky_mode: &str,
+    width_opt: Option<usize>,
+) {
     if contributions.is_empty() {
         println!("{}", "❌ No contribution data to render!".bright_red().bold());
         return;
     }
 
     let max_contributions = get_max_height(contributions);
-    let building_heights: Vec<u32> = contributions
-        .iter()
-        .map(|&count| dramatic_scale(count, max_contributions))
-        .collect();
-    
+    let target_height: u32 = 30;
+    let building_heights: Vec<u32> = compute_building_heights(contributions, max_contributions, target_height, scale);
+
     let total_contributions: u32 = contributions.iter().sum();
     let moon_type = select_moon_type(total_contributions);
     let max_height = *building_heights.iter().max().unwrap_or(&1) + 6;
 
     print_header();
     println!("{}", format!("📈 Max daily contributions: {}", max_contributions).bright_yellow().bold());
-    print_skyline_title();
-    render_braille_skyline(&building_heights, contributions, max_height, &moon_type, theme);
-    print_ground_section(25);
-    print_statistics(contributions, max_contributions);
-    
+    println!("{}", format!("⚖️  Scale: {}    🎭 Style: {}", scale, style).bright_cyan().bold());
+    print_skyline_title(style);
+
   
+    let mut width = building_heights.len().min(25);
+    if let Some(w) = width_opt { width = building_heights.len().min(w); }
+
+    
+    if sky_mode != "none" {
+        let cols = match style.to_lowercase().as_str() {
+            "braille" => width * 4,
+            _ => width * 3,
+        };
+        print_night_sky(cols, &moon_type);
+    }
+
+  
+    match style.to_lowercase().as_str() {
+        "ascii" => render_ascii_skyline(&building_heights, contributions, max_height, width, theme),
+        "blocks" => render_blocks_skyline(&building_heights, contributions, max_height, width, ascii_only, theme),
+        "hash" => render_hash_skyline(&building_heights, contributions, max_height, width, theme),
+        _ => render_braille_skyline(&building_heights, contributions, max_height, &moon_type, theme, width),
+    }
+
+    print_ground_section(width);
+    print_statistics(contributions, max_contributions);
+
     let achievements = crate::achievements::calculate_achievements(contributions);
     crate::achievements::display_achievements(&achievements);
-    
+
     print_legend();
     print_footer();
 }
 
-fn dramatic_scale(contribution_count: u32, max_contributions: u32) -> u32 {
-    if contribution_count == 0 { return 0; }
-    
-    let norm = contribution_count as f32 / max_contributions as f32;
-    let dramatic = norm.powf(1.2);
-    let scaled = (dramatic * 28.0) + 2.0;
-    scaled.round() as u32
-}
 
-fn render_braille_skyline(building_heights: &[u32], contributions: &[u32], max_height: u32, moon_type: &crate::renderer::sky_elements::MoonType, theme: &str) {
-    let width = building_heights.len().min(25);
-    print_night_sky(width * 4, moon_type);
-    
+
+fn render_braille_skyline(
+    building_heights: &[u32],
+    contributions: &[u32],
+    max_height: u32,
+    _moon_type: &crate::renderer::sky_elements::MoonType,
+    theme: &str,
+    width: usize,
+) {
     let total_contributions: u32 = contributions.iter().sum();
     let longest_streak = calculate_longest_streak(contributions);
     
@@ -217,6 +255,138 @@ fn render_braille_skyline(building_heights: &[u32], contributions: &[u32], max_h
                 let height = building_heights[i];
                 let building_part = get_building_part(height, row, day_contributions, theme);
                 line.push_str(&building_part);
+            }
+            if i < width - 1 { line.push(' '); }
+        }
+        println!("{}", line);
+    }
+}
+
+fn render_ascii_skyline(building_heights: &[u32], contributions: &[u32], max_height: u32, width: usize, theme: &str) {
+    let theme = get_theme(theme);
+    for row in (1..=max_height).rev() {
+        let mut line = String::new();
+        for i in 0..width {
+            let height = building_heights[i];
+            if row > height {
+                line.push_str("   ");
+            } else if row == height {
+                let roof = (theme.roof_color)("/\\/").to_string();
+                line.push_str(&roof);
+            } else if row == 1 {
+                let base = (theme.base_color)("‾‾‾").to_string();
+                line.push_str(&base);
+            } else {
+                let day_contrib = contributions[contributions.len().saturating_sub(width) + i];
+                let show_window = (row + i as u32) % 2 == 0 || day_contrib > 0;
+                let body = if show_window { "|[]" } else { "| |" };
+                let bucket = match height {
+                    h if h > 25 => 5,
+                    h if h > 20 => 4,
+                    h if h > 15 => 3,
+                    h if h > 10 => 2,
+                    h if h > 5  => 1,
+                    _           => 0,
+                };
+                let building_color = theme.building_colors[bucket.min(theme.building_colors.len()-1)];
+                line.push_str(&building_color(body).to_string());
+            }
+            if i < width - 1 { line.push(' '); }
+        }
+        println!("{}", line);
+    }
+}
+
+fn render_blocks_skyline(
+    building_heights: &[u32],
+    contributions: &[u32],
+    max_height: u32,
+    width: usize,
+    ascii_only: bool,
+    theme: &str,
+) {
+
+    let theme = get_theme(theme);
+    for row in (1..=max_height).rev() {
+        let mut line = String::new();
+        for i in 0..width {
+            let h = building_heights[i];
+            if row > h {
+                line.push_str("   ");
+            } else if row == h {
+                let roof = if ascii_only { "^^^".to_string() } else { "▀▀▀".to_string() };
+                let roof_col = (theme.roof_color)(&roof);
+                line.push_str(&roof_col.to_string());
+            } else if row == 1 {
+                let base = if ascii_only { "===".to_string() } else { "███".to_string() };
+                let base_col = (theme.base_color)(&base);
+                line.push_str(&base_col.to_string());
+            } else {
+                let bucket = match h {
+                    hh if hh > 25 => 5,
+                    hh if hh > 20 => 4,
+                    hh if hh > 15 => 3,
+                    hh if hh > 10 => 2,
+                    hh if hh > 5  => 1,
+                    _             => 0,
+                };
+                let building_color = theme.building_colors[bucket.min(theme.building_colors.len()-1)];
+                let mut trio = if ascii_only {
+                    match bucket {
+                        0 => ":::",
+                        1 => "===",
+                        2 => "***",
+                        3 => "@@@",
+                        4 => "+++",
+                        _ => "|||",
+                    }
+                    .to_string()
+                } else {
+                    "███".to_string()
+                };
+                let day_contrib = contributions[contributions.len().saturating_sub(width) + i];
+                if day_contrib > 0 && row % 3 == 0 {
+                    trio = if ascii_only { "| |".into() } else { "█ █".into() };
+                }
+                line.push_str(&building_color(&trio).to_string());
+            }
+            if i < width - 1 { line.push(' '); }
+        }
+        println!("{}", line);
+    }
+}
+
+fn render_hash_skyline(
+    building_heights: &[u32],
+    contributions: &[u32],
+    max_height: u32,
+    width: usize,
+    theme: &str,
+) {
+    let theme = get_theme(theme);
+    for row in (1..=max_height).rev() {
+        let mut line = String::new();
+        for i in 0..width {
+            let h = building_heights[i];
+            if row > h {
+                line.push_str("   ");
+            } else if row == h {
+                line.push_str(&(theme.roof_color)("###").to_string());
+            } else if row == 1 {
+                line.push_str(&(theme.base_color)("###").to_string());
+            } else {
+                let bucket = match h {
+                    hh if hh > 25 => 5,
+                    hh if hh > 20 => 4,
+                    hh if hh > 15 => 3,
+                    hh if hh > 10 => 2,
+                    hh if hh > 5  => 1,
+                    _             => 0,
+                };
+                let building_color = theme.building_colors[bucket.min(theme.building_colors.len()-1)];
+                let day_contrib = contributions[contributions.len().saturating_sub(width) + i];
+                let body = if day_contrib > 0 && row % 3 == 0 { "# #" } else { "###" };
+                line.push_str(&building_color(body).to_string());
             }
             if i < width - 1 { line.push(' '); }
         }
@@ -281,9 +451,15 @@ fn print_header() {
     println!("{}", "╚═══════════════════════════════════════════════════════════════╝".bright_cyan().bold());
 }
 
-fn print_skyline_title() {
+fn print_skyline_title(style: &str) {
     println!("\n{}", "┌─────────────────────────────────────────────────────────────┐".bright_magenta().bold());
-    println!("{}", "│                 BRAILLE-STYLE ASCII SKYLINE                 │".bright_magenta().bold());
+    let title = match style.to_lowercase().as_str() {
+        "ascii" => "│                     ASCII SKYLINE                          │",
+        "blocks" => "│             THEMED BLOCK BUILDINGS SKYLINE                │",
+        "hash" => "│                 HASH-THEMED ASCII SKYLINE                 │",
+        _ => "│                 BRAILLE-STYLE ASCII SKYLINE                 │",
+    };
+    println!("{}", title.bright_magenta().bold());
     println!("{}", "└─────────────────────────────────────────────────────────────┘".bright_magenta().bold());
 }
 

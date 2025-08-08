@@ -2,7 +2,7 @@ use colored::*;
 use std::io::{self, Write};
 use std::env;
 use crate::api::client::GitHubClient;
-use crate::renderer::skyline::render_skyline;
+use crate::renderer::skyline::render_skyline_with_options;
 
 pub fn show_splash_screen() {
     println!("{}", "╔══════════════════════════════════════════════════════════════════════════════╗".bright_cyan());
@@ -49,6 +49,10 @@ pub async fn interactive_mode() {
     
     
     let theme = get_theme_input();
+    let style = get_style_input();
+    let scale = get_scale_input();
+    let ascii_only = get_ascii_only_input();
+    let sky_mode = get_sky_mode_input();
     
     
     let output_file = get_output_preference();
@@ -76,20 +80,86 @@ pub async fn interactive_mode() {
             if let Some(filename) = output_file {
                 
                 use crate::output::{render_skyline_to_string, save_skyline_to_file};
-                let (skyline_content, total_contribs) = render_skyline_to_string(&contributions, &theme, &username);
+                let (skyline_content, total_contribs) = render_skyline_to_string(
+                    &contributions,
+                    &theme,
+                    &username,
+                    &style,
+                    &scale,
+                    ascii_only,
+                    &sky_mode,
+                    None,
+                );
                 match save_skyline_to_file(&skyline_content, &filename, &username, &theme, total_contribs) {
                     Ok(_) => {},
                     Err(e) => println!("{} Error saving to file: {}", "❌".bright_red(), e),
                 }
             } else {
-                
-                render_skyline(&contributions, &theme);
+                render_skyline_with_options(
+                    &contributions,
+                    &theme,
+                    &style,
+                    &scale,
+                    ascii_only,
+                    &sky_mode,
+                    None,
+                );
             }
         }
         Err(e) => {
             println!("{} Error fetching contributions: {}", "❌".bright_red(), e);
         }
     }
+}
+
+fn get_style_input() -> String {
+    println!("{}", "🎭 Style Selection".bright_cyan().bold());
+    println!("{}", "   Choose your rendering style:".bright_white());
+    println!("{}", "   [1] Braille (default)".bright_magenta());
+    println!("{}", "   [2] Blocks".bright_blue());
+    println!("{}", "   [3] ASCII".bright_green());
+    println!("{}", "   [4] Hash (#)".bright_cyan());
+    print!("{}", "   > ".bright_yellow());
+    io::stdout().flush().unwrap();
+    let mut choice = String::new();
+    if io::stdin().read_line(&mut choice).is_ok() {
+        match choice.trim() { "2" => "blocks".into(), "3" => "ascii".into(), "4" => "hash".into(), _ => "braille".into() }
+    } else { "braille".into() }
+}
+
+fn get_scale_input() -> String {
+    println!("{}", "📐 Scaling".bright_cyan().bold());
+    println!("{}", "   Choose scaling algorithm:".bright_white());
+    println!("{}", "   [1] Dramatic (default)".bright_magenta());
+    println!("{}", "   [2] Linear".bright_blue());
+    println!("{}", "   [3] Sqrt".bright_green());
+    println!("{}", "   [4] Log".bright_cyan());
+    print!("{}", "   > ".bright_yellow());
+    io::stdout().flush().unwrap();
+    let mut choice = String::new();
+    if io::stdin().read_line(&mut choice).is_ok() {
+        match choice.trim() { "2" => "linear".into(), "3" => "sqrt".into(), "4" => "log".into(), _ => "dramatic".into() }
+    } else { "dramatic".into() }
+}
+
+fn get_ascii_only_input() -> bool {
+    println!("{}", "🔤 ASCII-only?".bright_cyan().bold());
+    println!("{}", "   Use only ASCII characters (y/N)?".bright_white());
+    print!("{}", "   > ".bright_yellow());
+    io::stdout().flush().unwrap();
+    let mut ans = String::new();
+    if io::stdin().read_line(&mut ans).is_ok() { matches!(ans.trim().to_lowercase().as_str(), "y" | "yes") } else { false }
+}
+
+fn get_sky_mode_input() -> String {
+    println!("{}", "🌌 Sky".bright_cyan().bold());
+    println!("{}", "   Sky detail:".bright_white());
+    println!("{}", "   [1] Detailed (default)".bright_magenta());
+    println!("{}", "   [2] None".bright_blue());
+    print!("{}", "   > ".bright_yellow());
+    io::stdout().flush().unwrap();
+    let mut choice = String::new();
+    if io::stdin().read_line(&mut choice).is_ok() { if choice.trim() == "2" { "none".into() } else { "detailed".into() } } else { "detailed".into() }
 }
 
 fn get_username_input() -> String {
