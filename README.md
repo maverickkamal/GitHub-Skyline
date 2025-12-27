@@ -8,6 +8,12 @@
 
 GitHub Skyline is a command-line tool that visualizes your GitHub contribution history as a beautiful ASCII art city skyline. Each day becomes a building in your personal coding metropolis, with heights representing your daily contribution counts.
 
+<img width="783" height="852" alt="Screenshot 2025-08-01 010812" src="https://github.com/user-attachments/assets/92d44b79-883b-44dc-a9ec-03180ffb4950" />
+
+<img width="523" height="835" alt="Screenshot 2025-08-01 011057" src="https://github.com/user-attachments/assets/0aea2b78-a475-4c6c-853b-ebe570289995" />
+
+
+
 ## ✨ Features
 
 ### 🎨 **Visual Excellence**
